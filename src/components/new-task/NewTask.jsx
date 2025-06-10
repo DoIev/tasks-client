@@ -1,4 +1,4 @@
-import { Card, Group, Button, Center } from "@mantine/core";
+import { Card, Group, Button, Center, Text } from "@mantine/core";
 
 export const NewTask = ({ onClick }) => (
   <Card
@@ -8,23 +8,19 @@ export const NewTask = ({ onClick }) => (
     withBorder
     style={{
       background: "#f1f3f5",
-      minHeight: 390,
+      minHeight: 350,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
+      cursor: "pointer",
+      
     }}
+    onClick={onClick}
   >
     <Center style={{ width: "100%" }}>
-      <Button
-        variant="light"
-        color="gray"
-        size="xl"
-        radius="xl"
-        onClick={onClick}
-        style={{ fontSize: 24 }}
-      >
-        משימה חדשה
-      </Button>
+        <Text size="xl" weight="500" mb="md">
+          צור משימה חדשה    
+          </Text>
     </Center>
   </Card>
 );
