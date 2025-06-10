@@ -5,14 +5,10 @@ import {
   TextInput,
   Button,
   Group,
-  Text,
-  Paper,
-  Badge,
-  Center,
-  RingProgress,
 } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
-import { LineChart } from "@mantine/charts";
+import { TaskGauge } from "./task-gauge/TaskGauge";
+import { TaskGraph } from "./task-graph/TaskGraph";
 
 export const TaskDrawer = ({
   opened,
@@ -30,7 +26,6 @@ export const TaskDrawer = ({
     dateTo: "",
   });
 
-  // Sync form with task fields when task changes
   useEffect(() => {
     if (task) {
       setForm({
@@ -88,30 +83,9 @@ export const TaskDrawer = ({
     }
   };
 
-  // Extract dates if task exists
   const dateFrom = form.dateFrom || null;
   const dateTo = form.dateTo || null;
 
-  // Calculate completion percentage for the gauge
-  const completionPercent =
-    task && task.partitions && task.partitions.total > 0
-      ? Math.round((task.partitions.completed / task.partitions.total) * 100)
-      : 0;
-
-  // Calculate velocity data for the chart
-    const velocityData = [];
-    for (let i = 1; i < taskHistory.length; i++) {
-    const prev = taskHistory[i - 1];
-    const curr = taskHistory[i];
-    const dt = (curr.timestamp - prev.timestamp) / 1000;
-    const dCompleted = curr.completed - prev.completed;
-    const velocity = dt > 0 ? dCompleted / dt : 0;
-    velocityData.push({
-        time: new Date(curr.timestamp).toLocaleTimeString(),
-        velocity,
-    });
-    }
-    console.log("taskHistory in drawer:", taskHistory);
   return (
     <Drawer
       opened={opened}
@@ -162,46 +136,13 @@ export const TaskDrawer = ({
           withSeconds
         />
 
+        {/* Gauge */}
         {task && task.partitions && (
-          <Paper shadow="xs" p="md" radius="md" withBorder mt="md">
-            <Text fw={700} mb="xs">סטטוס מחיצות</Text>
-            <Group spacing="md">
-              <Badge color="blue" variant="filled">סה"כ: {task.partitions.total}</Badge>
-              <Badge color="green" variant="filled">הושלמו: {task.partitions.completed}</Badge>
-              <Badge color="yellow" variant="filled">בתהליך: {task.partitions.inProgress}</Badge>
-              <Badge color="red" variant="filled">נכשלו: {task.partitions.failed}</Badge>
-            </Group>
-            <Center mt="md">
-              <RingProgress
-                size={120}
-                thickness={14}
-                roundCaps
-                sections={[
-                  { value: completionPercent, color: "green" },
-                  { value: 100 - completionPercent, color: "gray" },
-                ]}
-                label={
-                  <Text c="green" fw={700} ta="center" size="lg">
-                    {completionPercent}%
-                  </Text>
-                }
-              />
-            </Center>
-          </Paper>
+          <TaskGauge task={task} />
         )}
 
-        {velocityData.length > 0 && (
-          <Paper shadow="xs" p="md" radius="md" withBorder mt="md">
-            <Text fw={700} mb="xs">מהירות (Velocity) - מחיצות לשנייה</Text>
-            <LineChart
-                h={180}
-                data={velocityData}
-                dataKey="time"
-                series={[{ name: "velocity", color: "blue" }]}
-                curveType="linear"
-            />
-          </Paper>
-        )}
+        {/* Velocity Graph */}
+        <TaskGraph taskHistory={taskHistory} />
 
         {!task && (
           <Button color="blue" onClick={handleCreate}>
