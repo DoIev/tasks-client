@@ -1,8 +1,7 @@
 import { Chip, Center } from "@mantine/core";
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
-
-const FETCH_INTERVAL = 5; // seconds
+import { taskService } from "../../services/task-service"; 
+import { FETCH_INTERVAL } from "../../config.js";
 
 export const FetchStatusChip = ({ onTasksFetched }) => {
   const [chipColor, setChipColor] = useState("gray");
@@ -11,8 +10,8 @@ export const FetchStatusChip = ({ onTasksFetched }) => {
   const timerRef = useRef();
 
   const fetchTasks = async () => {
-    const tasksFetched = await axios.get("http://localhost:3001/api/tasks");
-    onTasksFetched(tasksFetched.data);
+    const tasks = await taskService.getTasks();
+    onTasksFetched(tasks);
     setLastUpdate(new Date());
     setChipColor("green");
     setSecondsLeft(FETCH_INTERVAL);
@@ -20,19 +19,19 @@ export const FetchStatusChip = ({ onTasksFetched }) => {
   };
 
   useEffect(() => {
+    let seconds = FETCH_INTERVAL;
     fetchTasks();
     timerRef.current = setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) {
-          fetchTasks();
-          return FETCH_INTERVAL;
+        seconds -= 1;
+        if (seconds <= 0) {
+        fetchTasks();
+        seconds = FETCH_INTERVAL;
         }
-        return prev - 1;
-      });
+        setSecondsLeft(seconds);
     }, 1000);
+
     return () => clearInterval(timerRef.current);
-    // eslint-disable-next-line
-  }, []);
+    }, []);
 
   return (
     <Center mb="md">

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { taskService } from "../services/task-service";
 
 export function useTasks() {
   const [tasks, setTasks] = useState([]);
@@ -15,18 +16,14 @@ export function useTasks() {
     setSelectedTask(null);
   };
 
-  const fetchTasks = (fetchedTasks) => {
+  const getTasks = async (fetchedTasks) => {
+    console.log("Fetching tasks...");
+    await taskService.getTasks()
     setTasks(fetchedTasks);
   };
 
   const createTask = async (form) => {
-    const res = await fetch('http://localhost:3001/api/tasks/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
-    if (!res.ok) throw new Error('Failed to create task');
-    const newTask = await res.json();
+    await taskService.createTask(form);
     setTasks((prev) => [...prev, newTask]);
     setDrawerOpened(false);
   };
@@ -37,7 +34,7 @@ export function useTasks() {
 
   return {
     tasks,
-    setTasks: fetchTasks,
+    setTasks: getTasks,
     drawerOpened,
     openDrawerForTask,
     closeDrawer,
