@@ -136,14 +136,14 @@ export const TaskDrawer = ({
           withSeconds
         />
 
-        {/* Gauge */}
-        {task && task.partitions && (
-          <TaskGauge task={task} />
+        {isLiveTask && task.partitions && (
+            <>
+                <TaskGauge task={task} />
+                <TaskGraph taskHistory={taskHistory} task={task} />
+            </>
         )}
 
-        {/* Velocity Graph */}
-        <TaskGraph taskHistory={taskHistory} />
-
+        
         {!task && (
           <Button color="blue" onClick={handleCreate}>
             צור משימה

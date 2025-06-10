@@ -9,7 +9,6 @@ export function useTasks() {
   const fetchTasks = async () => {
     const { tasks } = await taskService.getTasksWithHistory();
     setTasks(tasks);
-    console.log("Tasks fetched:", tasks);
   };
 
   const createTask = async (form) => {
@@ -18,10 +17,14 @@ export function useTasks() {
     setDrawerOpened(false);
   };
 
-  const openDrawerForTask = (task) => {
-    setSelectedTaskId(task.id);
+    const openDrawerForTask = (task) => {
+    if (task && task.id) {
+        setSelectedTaskId(task.id);
+    } else {
+        setSelectedTaskId(null); // No task selected, means "create new"
+    }
     setDrawerOpened(true);
-  };
+    };
 
   const closeDrawer = () => {
     setDrawerOpened(false);
