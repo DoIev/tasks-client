@@ -1,20 +1,9 @@
 import { Grid } from "@mantine/core";
 import { Task } from "../task/Task";
 import { NewTask } from "../new-task/NewTask";
-import {useState, useEffect} from "react";
 
-import axios from "axios";
 
-export const Tasks = ({ setDrawerOpened }) => {
-
-    const [tasks, setTasks] = useState([]);
-
-    useEffect(() => {
-        (async () => {
-            const tasksFetched = await axios.get("http://localhost:3001/api/tasks");
-            setTasks(tasksFetched.data);
-        })()
-    }, [])
+export const Tasks = ({ setDrawerOpened, tasks }) => {
 
     return (
       <Grid justify="space-around">

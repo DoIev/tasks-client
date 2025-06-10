@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Button , Input, Textarea, Switch, Card, MantineProvider } from "@mantine/core";
-import { Sun, Moon } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
-import axios from "axios";
+import { Drawer, MantineProvider } from "@mantine/core";
+import { useDisclosure } from '@mantine/hooks';
+
 import './App.css'
 import { Tasks } from "./components/tasks/Tasks";
+import { FetchStatusChip } from "./components/fetch-status/FetchStatusChip";
 
 function App() {
+
+  const [tasks, setTasks] = useState([]);
+
   return <>
     <MantineProvider>
-      <Tasks></Tasks>
-
+      <FetchStatusChip onTasksFetched={setTasks} />
+      <Tasks setDrawerOpened={() => {}} tasks={tasks}/>
     </MantineProvider>
   </>
 }
