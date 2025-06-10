@@ -1,38 +1,38 @@
 import React, { useState } from "react";
-import { MantineProvider } from "@mantine/core";
+import { MantineProvider, Button, Group, createTheme } from '@mantine/core';
 import { Tasks } from "./components/tasks/Tasks";
 import { FetchStatusChip } from "./components/fetch-status/FetchStatusChip";
 import { TaskDrawer } from "./components/task-drawer/TaskDrawer";
+import { useTasks } from "./hooks/useTasks";
+
+const lightTheme = createTheme({ primaryColor: 'blue', colorScheme: 'light' });
+const darkTheme = createTheme({ primaryColor: 'blue', colorScheme: 'dark' });
 
 function App() {
-  const [tasks, setTasks] = useState([]);
-  const [drawerOpened, setDrawerOpened] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
-
-  const handleTaskClick = (task) => {
-    setSelectedTask(task);
-    setDrawerOpened(true);
-  };
-
-  const handleDrawerClose = () => {
-    setDrawerOpened(false);
-    setSelectedTask(null);
-  };
-
-  const handleStopTask = () => {
-    // Implement your stop logic here
-    alert(`Stopping task: ${selectedTask?.title}`);
-  };
+  const {
+    tasks,
+    setTasks,
+    drawerOpened,
+    openDrawerForTask,
+    closeDrawer,
+    selectedTask,
+    createTask,
+    stopTask,
+  } = useTasks();
 
   return (
-    <MantineProvider>
+    <MantineProvider
+      withGlobalStyles
+      withNormalizeCSS
+    >
       <FetchStatusChip onTasksFetched={setTasks} />
-      <Tasks setDrawerOpened={handleTaskClick} tasks={tasks} />
+      <Tasks setDrawerOpened={openDrawerForTask} tasks={tasks} />
       <TaskDrawer
         opened={drawerOpened}
-        onClose={handleDrawerClose}
+        onClose={closeDrawer}
         task={selectedTask}
-        onStop={handleStopTask}
+        onStop={stopTask}
+        onCreate={createTask}
       />
     </MantineProvider>
   );
