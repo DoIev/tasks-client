@@ -1,35 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { MantineProvider, Button, Group, createTheme } from '@mantine/core';
+import { Tasks } from "./components/tasks/Tasks";
+import { FetchStatusChip } from "./components/fetch-status/FetchStatusChip";
+import { TaskDrawer } from "./components/task-drawer/TaskDrawer";
+import { useTasks } from "./hooks/useTasks";
+
+const lightTheme = createTheme({ primaryColor: 'blue', colorScheme: 'light' });
+const darkTheme = createTheme({ primaryColor: 'blue', colorScheme: 'dark' });
 
 function App() {
-  const [count, setCount] = useState(0)
+  const {
+    tasks,
+    fetchTasks,
+    drawerOpened,
+    openDrawerForTask,
+    closeDrawer,
+    selectedTask,
+    selectedTaskHistory,
+    createTask,
+    stopTask,
+  } = useTasks();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <MantineProvider
+      withGlobalStyles
+      withNormalizeCSS
+    >
+      <FetchStatusChip onTasksFetched={fetchTasks} />
+      <Tasks setDrawerOpened={openDrawerForTask} tasks={tasks} />
+      <TaskDrawer
+        opened={drawerOpened}
+        onClose={closeDrawer}
+        task={selectedTask}
+        taskHistory={selectedTaskHistory}
+        onStop={stopTask}
+        onCreate={createTask}
+      />
+    </MantineProvider>
+  );
 }
 
-export default App
+export default App;
