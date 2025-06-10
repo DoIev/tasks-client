@@ -9,12 +9,11 @@ import {
 } from '@mantine/core';
 import '@mantine/core/styles.css';
 
-export const Task = ({ id, title, description, taskInfo, onClick }) => {
-  const progress = taskInfo?.progress ?? 0;
-  const status = taskInfo?.status ?? '';
+export const Task = ({ id, title, description, partitions = {}, onClick }) => {
+  const { total = 0, completed = 0, failed = 0, inProgress = 0 } = partitions;
+  const progress = total > 0 ? completed / total : 0;
 
   const getProgressColor = (progress) => {
-    // progress: 0 -> red, 1 -> green
     const r = Math.round(255 * (1 - progress));
     const g = Math.round(255 * progress);
     return `rgb(${r},${g},0)`;
@@ -34,7 +33,6 @@ export const Task = ({ id, title, description, taskInfo, onClick }) => {
         <Text fw={500}>{title}</Text>
         <Group>
           <Badge color="pink">{`#${id}`}</Badge>
-          <Badge color="gray">{status}</Badge>
         </Group>
       </Group>
 

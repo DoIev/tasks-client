@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Drawer, Stack, TextInput, Button, Group, Text } from "@mantine/core";
+import { Drawer, Stack, TextInput, Button, Group, Text, Paper, Badge } from "@mantine/core";
+import { RingProgress, Center } from "@mantine/core"; // Add this import
 
 export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }) => {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    status: "",
-    progress: 0,
+    dateFrom: "",
+    dateTo: "",
   });
 
   const [stopped, setStopped] = useState(false);
@@ -25,8 +26,25 @@ export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }
   };
 
   const handleCreate = () => {
-    if (onCreate) onCreate(form);
+    if (onCreate) {
+      onCreate({
+        title: form.title,
+        description: form.description,
+        dates: [{ dateFrom: form.dateFrom, dateTo: form.dateTo }],
+        partitions: { total: 0, completed: 0, failed: 0, inProgress: 0 },
+      });
+    }
   };
+
+  // Extract dates if task exists
+  const dateFrom = task?.dates?.[0]?.dateFrom ?? form.dateFrom;
+  const dateTo = task?.dates?.[0]?.dateTo ?? form.dateTo;
+
+  // Calculate completion percentage for the gauge
+  const completionPercent =
+    task && task.partitions && task.partitions.total > 0
+      ? Math.round((task.partitions.completed / task.partitions.total) * 100)
+      : 0;
 
   return (
     <Drawer
@@ -52,20 +70,47 @@ export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }
           readOnly={!!task}
         />
         <TextInput
-          label="סטטוס"
-          name="status"
-          value={task ? task.taskInfo?.status ?? "" : form.status}
+          label="מתאריך"
+          name="dateFrom"
+          value={dateFrom}
           onChange={handleInputChange}
           readOnly={!!task}
         />
         <TextInput
-          label="התקדמות"
-          name="progress"
-          value={task ? Math.round((task.taskInfo?.progress ?? 0) * 100) : form.progress}
+          label="עד תאריך"
+          name="dateTo"
+          value={dateTo}
           onChange={handleInputChange}
           readOnly={!!task}
-          rightSection={task ? "%" : null}
         />
+
+        {task && task.partitions && (
+          <Paper shadow="xs" p="md" radius="md" withBorder mt="md">
+            <Text fw={700} mb="xs">סטטוס מחיצות</Text>
+            <Group spacing="md">
+              <Badge color="blue" variant="filled">סה"כ: {task.partitions.total}</Badge>
+              <Badge color="green" variant="filled">הושלמו: {task.partitions.completed}</Badge>
+              <Badge color="yellow" variant="filled">בתהליך: {task.partitions.inProgress}</Badge>
+              <Badge color="red" variant="filled">נכשלו: {task.partitions.failed}</Badge>
+            </Group>
+            <Center mt="md">
+              <RingProgress
+                size={120}
+                thickness={14}
+                roundCaps
+                sections={[
+                  { value: completionPercent, color: "green" },
+                  { value: 100 - completionPercent, color: "gray" },
+                ]}
+                label={
+                  <Text c="green" fw={700} ta="center" size="lg">
+                    {completionPercent}%
+                  </Text>
+                }
+              />
+            </Center>
+          </Paper>
+        )}
 
         {!task && (
           <Button color="blue" onClick={handleCreate}>
