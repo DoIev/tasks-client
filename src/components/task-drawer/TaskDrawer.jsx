@@ -1,6 +1,17 @@
-import { useState } from "react";
-import { Drawer, Stack, TextInput, Button, Group, Text, Paper, Badge } from "@mantine/core";
-import { RingProgress, Center } from "@mantine/core"; // Add this import
+import { useState, useMemo } from "react";
+import {
+  Drawer,
+  Stack,
+  TextInput,
+  Button,
+  Group,
+  Text,
+  Paper,
+  Badge,
+  Center,
+  RingProgress,
+} from "@mantine/core";
+import { DateTimePicker } from "@mantine/dates";
 
 export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }) => {
   const [form, setForm] = useState({
@@ -12,8 +23,22 @@ export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }
 
   const [stopped, setStopped] = useState(false);
 
+  const isLiveTask = !!task;
+
+  const inputStyle = useMemo(
+    () =>
+      isLiveTask
+        ? { opacity: 0.8, cursor: "not-allowed", pointerEvents: "auto" }
+        : {},
+    [isLiveTask]
+  );
+
   const handleInputChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleDateChange = (name, value) => {
+    setForm({ ...form, [name]: value });
   };
 
   const handleStop = () => {
@@ -37,8 +62,12 @@ export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }
   };
 
   // Extract dates if task exists
-  const dateFrom = task?.dates?.[0]?.dateFrom ?? form.dateFrom;
-  const dateTo = task?.dates?.[0]?.dateTo ?? form.dateTo;
+  const dateFrom = task?.dates?.[0]?.dateFrom
+    ? new Date(task.dates[0].dateFrom)
+    : form.dateFrom || null;
+  const dateTo = task?.dates?.[0]?.dateTo
+    ? new Date(task.dates[0].dateTo)
+    : form.dateTo || null;
 
   // Calculate completion percentage for the gauge
   const completionPercent =
@@ -60,28 +89,40 @@ export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }
           name="title"
           value={task ? task.title : form.title}
           onChange={handleInputChange}
-          readOnly={!!task}
+          readOnly={isLiveTask}
+          disabled={isLiveTask}
+          style={inputStyle}
         />
         <TextInput
           label="תיאור"
           name="description"
           value={task ? task.description : form.description}
           onChange={handleInputChange}
-          readOnly={!!task}
+          readOnly={isLiveTask}
+          disabled={isLiveTask}
+          style={inputStyle}
         />
-        <TextInput
-          label="מתאריך"
-          name="dateFrom"
-          value={dateFrom}
-          onChange={handleInputChange}
-          readOnly={!!task}
+        <DateTimePicker
+        label="מתאריך"
+        name="dateFrom"
+        value={dateFrom}
+        onChange={(value) => handleDateChange("dateFrom", value)}
+        readOnly={isLiveTask}
+        disabled={isLiveTask}
+        style={inputStyle}
+        clearable
+        withSeconds
         />
-        <TextInput
-          label="עד תאריך"
-          name="dateTo"
-          value={dateTo}
-          onChange={handleInputChange}
-          readOnly={!!task}
+        <DateTimePicker
+        label="עד תאריך"
+        name="dateTo"
+        value={dateTo}
+        onChange={(value) => handleDateChange("dateTo", value)}
+        readOnly={isLiveTask}
+        disabled={isLiveTask}
+        style={inputStyle}
+        clearable
+        withSeconds
         />
 
         {task && task.partitions && (

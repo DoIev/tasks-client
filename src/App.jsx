@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { MantineProvider, Button, Group, createTheme } from '@mantine/core';
 import { Tasks } from "./components/tasks/Tasks";
 import { FetchStatusChip } from "./components/fetch-status/FetchStatusChip";

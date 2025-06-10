@@ -1,4 +1,5 @@
 import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
 import "./App.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
