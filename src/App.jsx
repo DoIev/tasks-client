@@ -1,18 +1,19 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from "react";
+import { Button , Input, Textarea, Switch, Card, MantineProvider } from "@mantine/core";
+import { Sun, Moon } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import axios from "axios";
 import './App.css'
-import { Task } from './components/Task'
-import { MantineProvider } from '@mantine/core'
-function App() {
-  const [count, setCount] = useState(0)
+import { Tasks } from "./components/tasks/Tasks";
 
-  return (
-    <>
+function App() {
+  return <>
     <MantineProvider>
-      <Task description={"dummy desc"} id={1} status={"in progress"} title={"basic task"} key={1}></Task>
+      <Tasks></Tasks>
 
     </MantineProvider>
-    </>
-  )
+  </>
 }
+
 
 export default App
