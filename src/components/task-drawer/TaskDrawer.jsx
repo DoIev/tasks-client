@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Drawer,
   Stack,
@@ -12,8 +12,17 @@ import {
   RingProgress,
 } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
+import { LineChart } from "@mantine/charts";
 
-export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }) => {
+export const TaskDrawer = ({
+  opened,
+  onClose,
+  task,
+  onStop,
+  onDelete,
+  onCreate,
+  taskHistory = [],
+}) => {
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -21,8 +30,26 @@ export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }
     dateTo: "",
   });
 
-  const [stopped, setStopped] = useState(false);
+  // Sync form with task fields when task changes
+  useEffect(() => {
+    if (task) {
+      setForm({
+        title: task.title || "",
+        description: task.description || "",
+        dateFrom: task.dates?.[0]?.dateFrom ? new Date(task.dates[0].dateFrom) : "",
+        dateTo: task.dates?.[0]?.dateTo ? new Date(task.dates[0].dateTo) : "",
+      });
+    } else {
+      setForm({
+        title: "",
+        description: "",
+        dateFrom: "",
+        dateTo: "",
+      });
+    }
+  }, [task]);
 
+  const [stopped, setStopped] = useState(false);
   const isLiveTask = !!task;
 
   const inputStyle = useMemo(
@@ -62,12 +89,8 @@ export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }
   };
 
   // Extract dates if task exists
-  const dateFrom = task?.dates?.[0]?.dateFrom
-    ? new Date(task.dates[0].dateFrom)
-    : form.dateFrom || null;
-  const dateTo = task?.dates?.[0]?.dateTo
-    ? new Date(task.dates[0].dateTo)
-    : form.dateTo || null;
+  const dateFrom = form.dateFrom || null;
+  const dateTo = form.dateTo || null;
 
   // Calculate completion percentage for the gauge
   const completionPercent =
@@ -75,6 +98,20 @@ export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }
       ? Math.round((task.partitions.completed / task.partitions.total) * 100)
       : 0;
 
+  // Calculate velocity data for the chart
+    const velocityData = [];
+    for (let i = 1; i < taskHistory.length; i++) {
+    const prev = taskHistory[i - 1];
+    const curr = taskHistory[i];
+    const dt = (curr.timestamp - prev.timestamp) / 1000;
+    const dCompleted = curr.completed - prev.completed;
+    const velocity = dt > 0 ? dCompleted / dt : 0;
+    velocityData.push({
+        time: new Date(curr.timestamp).toLocaleTimeString(),
+        velocity,
+    });
+    }
+    console.log("taskHistory in drawer:", taskHistory);
   return (
     <Drawer
       opened={opened}
@@ -87,7 +124,7 @@ export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }
         <TextInput
           label="כותרת"
           name="title"
-          value={task ? task.title : form.title}
+          value={form.title}
           onChange={handleInputChange}
           readOnly={isLiveTask}
           disabled={isLiveTask}
@@ -96,33 +133,33 @@ export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }
         <TextInput
           label="תיאור"
           name="description"
-          value={task ? task.description : form.description}
+          value={form.description}
           onChange={handleInputChange}
           readOnly={isLiveTask}
           disabled={isLiveTask}
           style={inputStyle}
         />
         <DateTimePicker
-        label="מתאריך"
-        name="dateFrom"
-        value={dateFrom}
-        onChange={(value) => handleDateChange("dateFrom", value)}
-        readOnly={isLiveTask}
-        disabled={isLiveTask}
-        style={inputStyle}
-        clearable
-        withSeconds
+          label="מתאריך"
+          name="dateFrom"
+          value={dateFrom}
+          onChange={(value) => handleDateChange("dateFrom", value)}
+          readOnly={isLiveTask}
+          disabled={isLiveTask}
+          style={inputStyle}
+          clearable
+          withSeconds
         />
         <DateTimePicker
-        label="עד תאריך"
-        name="dateTo"
-        value={dateTo}
-        onChange={(value) => handleDateChange("dateTo", value)}
-        readOnly={isLiveTask}
-        disabled={isLiveTask}
-        style={inputStyle}
-        clearable
-        withSeconds
+          label="עד תאריך"
+          name="dateTo"
+          value={dateTo}
+          onChange={(value) => handleDateChange("dateTo", value)}
+          readOnly={isLiveTask}
+          disabled={isLiveTask}
+          style={inputStyle}
+          clearable
+          withSeconds
         />
 
         {task && task.partitions && (
@@ -150,6 +187,19 @@ export const TaskDrawer = ({ opened, onClose, task, onStop, onDelete, onCreate }
                 }
               />
             </Center>
+          </Paper>
+        )}
+
+        {velocityData.length > 0 && (
+          <Paper shadow="xs" p="md" radius="md" withBorder mt="md">
+            <Text fw={700} mb="xs">מהירות (Velocity) - מחיצות לשנייה</Text>
+            <LineChart
+                h={180}
+                data={velocityData}
+                dataKey="time"
+                series={[{ name: "velocity", color: "blue" }]}
+                curveType="linear"
+            />
           </Paper>
         )}
 

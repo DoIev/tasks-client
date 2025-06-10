@@ -15,6 +15,7 @@ function App() {
     openDrawerForTask,
     closeDrawer,
     selectedTask,
+    selectedTaskHistory,
     createTask,
     stopTask,
   } = useTasks();
@@ -26,10 +27,12 @@ function App() {
     >
       <FetchStatusChip onTasksFetched={setTasks} />
       <Tasks setDrawerOpened={openDrawerForTask} tasks={tasks} />
+      // in App.jsx
       <TaskDrawer
         opened={drawerOpened}
         onClose={closeDrawer}
         task={selectedTask}
+        taskHistory={selectedTaskHistory}
         onStop={stopTask}
         onCreate={createTask}
       />
