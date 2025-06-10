@@ -10,7 +10,7 @@ const darkTheme = createTheme({ primaryColor: 'blue', colorScheme: 'dark' });
 function App() {
   const {
     tasks,
-    setTasks,
+    fetchTasks,
     drawerOpened,
     openDrawerForTask,
     closeDrawer,
@@ -25,9 +25,8 @@ function App() {
       withGlobalStyles
       withNormalizeCSS
     >
-      <FetchStatusChip onTasksFetched={setTasks} />
+      <FetchStatusChip onTasksFetched={fetchTasks} />
       <Tasks setDrawerOpened={openDrawerForTask} tasks={tasks} />
-      // in App.jsx
       <TaskDrawer
         opened={drawerOpened}
         onClose={closeDrawer}
