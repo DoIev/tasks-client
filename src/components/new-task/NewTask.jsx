@@ -6,7 +6,13 @@ export const NewTask = ({ onClick }) => (
     padding="lg"
     radius="md"
     withBorder
-    style={{ background: "#f1f3f5", minHeight: 300, display: "flex", alignItems: "center", justifyContent: "center" }}
+    style={{
+      background: "#f1f3f5",
+      minHeight: 390,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
   >
     <Center style={{ width: "100%" }}>
       <Button
@@ -20,4 +26,5 @@ export const NewTask = ({ onClick }) => (
         משימה חדשה
       </Button>
     </Center>
-  </Card>);
+  </Card>
+);
