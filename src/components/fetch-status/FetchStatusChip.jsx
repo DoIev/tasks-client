@@ -1,20 +1,15 @@
-import { Chip, Center } from "@mantine/core";
 import { useState, useEffect, useRef } from "react";
-import { taskService } from "../../services/task-service"; 
+import { Chip, Center } from "@mantine/core";
 import { FETCH_INTERVAL } from "../../config.js";
-import { useTasks } from "../../hooks/useTasks.js";
 
 export const FetchStatusChip = ({ onTasksFetched }) => {
   const [chipColor, setChipColor] = useState("gray");
   const [lastUpdate, setLastUpdate] = useState(null);
   const [secondsLeft, setSecondsLeft] = useState(FETCH_INTERVAL);
-  const {setTasks} = useTasks();
   const timerRef = useRef();
 
-  const fetchTasks = async () => {
-    const tasks = await taskService.getTasks();
-    setTasks(tasks)
-    onTasksFetched(tasks);
+  const getTasks = async () => {
+    await onTasksFetched(); // This calls fetchTasks from the hook in the parent!
     setLastUpdate(new Date());
     setChipColor("green");
     setSecondsLeft(FETCH_INTERVAL);
@@ -23,18 +18,18 @@ export const FetchStatusChip = ({ onTasksFetched }) => {
 
   useEffect(() => {
     let seconds = FETCH_INTERVAL;
-    fetchTasks();
+    getTasks();
     timerRef.current = setInterval(() => {
-        seconds -= 1;
-        if (seconds <= 0) {
-        fetchTasks();
+      seconds -= 1;
+      if (seconds <= 0) {
+        getTasks();
         seconds = FETCH_INTERVAL;
-        }
-        setSecondsLeft(seconds);
+      }
+      setSecondsLeft(seconds);
     }, 1000);
 
     return () => clearInterval(timerRef.current);
-    }, []);
+  }, []);
 
   return (
     <Center mb="md">

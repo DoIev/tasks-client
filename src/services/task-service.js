@@ -1,20 +1,32 @@
-import { TASKS_URL } from "../config";
 import axios from "axios";
+import { TASKS_URL } from "../config";
 
-export const TaskService = () => {
-  const getTasks = async () => {
-    const response = await axios.get(TASKS_URL);
-    return response.data;
-  };
+let historyStore = {}; // { [taskId]: [{ timestamp, completed, total }] }
 
-  const createTask = async (form) => {
-    const response = await axios.post(TASKS_URL, {
-      body: JSON.stringify(form),
+export const taskService = {
+  async getTasksWithHistory() {
+    const { data: tasks } = await axios.get(TASKS_URL);
+    const now = Date.now();
+    tasks.forEach(task => {
+      if (!historyStore[task.id]) historyStore[task.id] = [];
+      historyStore[task.id].push({
+        timestamp: now,
+        completed: task.partitions.completed,
+        total: task.partitions.total,
+      });
+      if (historyStore[task.id].length > 10) {
+        historyStore[task.id] = historyStore[task.id].slice(-10);
+      }
     });
-    return response.data;
-  };
+    return { tasks, historyStore };
+  },
 
-  return { getTasks, createTask };
-}
+  async createTask(form) {
+    const { data } = await axios.post(TASKS_URL, form);
+    return data;
+  },
 
-export const taskService = TaskService();
+  getTaskHistory(taskId) {
+    return historyStore[taskId] || [];
+  }
+};

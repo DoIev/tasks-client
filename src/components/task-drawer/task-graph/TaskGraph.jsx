@@ -14,6 +14,7 @@ export const TaskGraph = ({ taskHistory }) => {
       velocity,
     });
   }
+  console.log(taskHistory);
 
   if (velocityData.length === 0) return null;
 
